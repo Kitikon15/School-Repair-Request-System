@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}รายการแจ้งซ่อมทั้งหมด{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-list-check text-primary me-2"></i> รายการแจ้งซ่อมทั้งหมด
+        </h2>
+        <p class="text-muted mb-0">ค้นหา ติดตามสถานะ และจัดการใบแจ้งซ่อมอุปกรณ์ในโรงเรียน</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('repair_create') }}" class="btn btn-warning text-dark fw-bold">
+            <i class="bi bi-plus-circle-fill me-1"></i> แจ้งซ่อมใหม่
+        </a>
+        <a href="{{ url_for('repair_export_csv') }}" class="btn btn-success">
+            <i class="bi bi-file-earmark-spreadsheet-fill me-1"></i> ส่งออก CSV
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filter Card -->
+<div class="card card-custom mb-4 p-3 border-0">
+    <form method="GET" action="{{ url_for('repairs_list') }}" class="row g-2 align-items-center">
+        <!-- Search Keyword -->
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" name="search" value="{{ request.args.get('search', '') }}" placeholder="ค้นหารหัส, อาคาร, ห้อง, ปัญหา...">
+            </div>
+        </div>
+
+        <!-- Filter Status -->
+        <div class="col-sm-6 col-md-2">
+            <select name="status" class="form-select">
+                <option value="">-- ทุกสถานะ --</option>
+                <option value="pending" {{ 'selected' if request.args.get('status') == 'pending' }}>รอรับเรื่อง</option>
+                <option value="accepted" {{ 'selected' if request.args.get('status') == 'accepted' }}>รับเรื่องแล้ว</option>
+                <option value="in_progress" {{ 'selected' if request.args.get('status') == 'in_progress' }}>กำลังดำเนินการ</option>
+                <option value="completed" {{ 'selected' if request.args.get('status') == 'completed' }}>ซ่อมเสร็จสิ้น</option>
+            </select>
+        </div>
+
+        <!-- Filter Problem Type -->
+        <div class="col-sm-6 col-md-2">
+            <select name="problem_type" class="form-select">
+                <option value="">-- ทุกประเภทปัญหา --</option>
+                <option value="electrical" {{ 'selected' if request.args.get('problem_type') == 'electrical' }}>ระบบไฟฟ้า</option>
+                <option value="furniture" {{ 'selected' if request.args.get('problem_type') == 'furniture' }}>ครุภัณฑ์ / เฟอร์นิเจอร์</option>
+                <option value="computer" {{ 'selected' if request.args.get('problem_type') == 'computer' }}>คอมพิวเตอร์</option>
+                <option value="aircon" {{ 'selected' if request.args.get('problem_type') == 'aircon' }}>เครื่องปรับอากาศ</option>
+                <option value="other" {{ 'selected' if request.args.get('problem_type') == 'other' }}>อื่นๆ</option>
+            </select>
+        </div>
+
+        <!-- Filter Urgency -->
+        <div class="col-sm-6 col-md-2">
+            <select name="urgency" class="form-select">
+                <option value="">-- ทุกความเร่งด่วน --</option>
+                <option value="low" {{ 'selected' if request.args.get('urgency') == 'low' }}>ต่ำ</option>
+                <option value="medium" {{ 'selected' if request.args.get('urgency') == 'medium' }}>ปานกลาง</option>
+                <option value="high" {{ 'selected' if request.args.get('urgency') == 'high' }}>สูง (ด่วนมาก)</option>
+            </select>
+        </div>
+
+        <!-- Submit & Reset Buttons -->
+        <div class="col-sm-6 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-funnel-fill"></i> กรอง
+            </button>
+            <a href="{{ url_for('repairs_list') }}" class="btn btn-outline-secondary" title="ล้างการค้นหา">
+                <i class="bi bi-arrow-clockwise"></i>
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Scope Filter Navigation (Tabs) -->
+<ul class="nav nav-pills mb-3">
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if not request.args.get('scope') }}" href="{{ url_for('repairs_list') }}">
+            รายการทั้งหมด ({{ repairs|length }})
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if request.args.get('scope') == 'mine' }}" href="{{ url_for('repairs_list', scope='mine') }}">
+            <i class="bi bi-person-fill"></i> เฉพาะรายการของฉัน
+        </a>
+    </li>
+</ul>
+
+<!-- Repair Table -->
+<div class="card card-custom border-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover table-custom align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>รหัสใบแจ้งซ่อม</th>
+                    <th>วันที่แจ้ง</th>
+                    <th>สถานที่</th>
+                    <th>ประเภทปัญหา</th>
+                    <th>รายละเอียด</th>
+                    <th>ความเร่งด่วน</th>
+                    <th>สถานะ</th>
+                    <th>ผู้รับผิดชอบ</th>
+                    <th class="text-end">การจัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in repairs %}
+                <tr>
+                    <td class="fw-bold text-nowrap">
+                        <a href="{{ url_for('repair_detail', id=r.id) }}" class="text-decoration-none text-primary">
+                            {{ r.request_no }}
+                        </a>
+                    </td>
+                    <td class="text-nowrap small text-muted">
+                        {{ r.created_at|thai_date }}
+                    </td>
+                    <td>
+                        <div class="fw-semibold">{{ r.building }}</div>
+                        <small class="text-muted">{{ r.room }}</small>
+                    </td>
+                    <td class="text-nowrap">
+                        <i class="bi {{ r.problem_type_icon }} me-1"></i> {{ r.problem_type_label }}
+                    </td>
+                    <td>
+                        <div class="text-truncate fw-medium" style="max-width: 250px;" title="{{ r.description }}">
+                            {{ r.description }}
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <small class="text-muted"><i class="bi bi-person"></i> {{ r.reporter.fullname }}</small>
+                            {% if r.images %}
+                                <span class="badge bg-light text-secondary border py-0 px-1" title="{{ r.images|length }} รูปภาพ">
+                                    <i class="bi bi-camera-fill text-muted"></i> {{ r.images|length }}
+                                </span>
+                            {% endif %}
+                            {% if r.comments %}
+                                <span class="badge bg-light text-secondary border py-0 px-1" title="{{ r.comments|length }} ความคิดเห็น">
+                                    <i class="bi bi-chat-text-fill text-muted"></i> {{ r.comments|length }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="{{ r.urgency_badge_class }}">{{ r.urgency_label }}</span>
+                    </td>
+                    <td>
+                        <span class="{{ r.status_badge_class }}">{{ r.status_label }}</span>
+                    </td>
+                    <td class="small">
+                        {% if r.technician %}
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-person-wrench text-warning"></i> {{ r.technician.fullname }}
+                            </span>
+                        {% else %}
+                            <span class="text-muted fst-italic">ยังไม่มอบหมาย</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <a href="{{ url_for('repair_detail', id=r.id) }}" class="btn btn-sm btn-outline-primary" title="ดูรายละเอียด">
+                            <i class="bi bi-eye"></i> รายละเอียด
+                        </a>
+                        <a href="{{ url_for('repair_print', id=r.id) }}" target="_blank" class="btn btn-sm btn-outline-secondary" title="พิมพ์ใบแจ้งซ่อม">
+                            <i class="bi bi-printer"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                        ไม่พบข้อมูลใบแจ้งซ่อมตามเงื่อนไขที่ระบุ
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

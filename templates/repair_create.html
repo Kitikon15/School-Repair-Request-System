@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}แจ้งซ่อมใหม่{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card card-custom p-4 border-0">
+            <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+                <div class="bg-primary text-white p-3 rounded-circle me-3">
+                    <i class="bi bi-pencil-square fs-3"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">แบบฟอร์มแจ้งซ่อมอุปกรณ์</h3>
+                    <p class="text-muted mb-0">กรอกรายละเอียดความเสียหายของอุปกรณ์เพื่อประสานงานเจ้าหน้าที่เข้าดำเนินการ</p>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('repair_create') }}" enctype="multipart/form-data" id="repairForm">
+                <!-- Location: Building & Room -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-7">
+                        <label for="building" class="form-label fw-bold">
+                            <i class="bi bi-building me-1 text-primary"></i> อาคาร / สถานที่ <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="building" name="building" placeholder="เช่น อาคาร 1 (อำนวยการ), อาคาร 2 (วิทย์)" required list="buildingList">
+                        <datalist id="buildingList">
+                            <option value="อาคาร 1 (อาคารอำนวยการ)">
+                            <option value="อาคาร 2 (อาคารวิทยาศาสตร์)">
+                            <option value="อาคาร 3 (อาคารศิลปะและดนตรี)">
+                            <option value="อาคาร 4 (ศูนย์คอมพิวเตอร์และสารสนเทศ)">
+                            <option value="โรงยิมเนเซียม / สนามกีฬา">
+                            <option value="โรงอาหารกลาง">
+                        </datalist>
+                    </div>
+
+                    <div class="col-md-5">
+                        <label for="room" class="form-label fw-bold">
+                            <i class="bi bi-door-open me-1 text-primary"></i> ห้อง / จุดที่พบปัญหา <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" id="room" name="room" placeholder="เช่น ห้อง 204, ห้องพักครูคณิต" required>
+                    </div>
+                </div>
+
+                <!-- Problem Type & Urgency -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="problem_type" class="form-label fw-bold">
+                            <i class="bi bi-tag-fill me-1 text-primary"></i> ประเภทปัญหา <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="problem_type" name="problem_type" required>
+                            <option value="" disabled selected>-- เลือกประเภทปัญหา --</option>
+                            <option value="aircon">❄️ เครื่องปรับอากาศ (Air Conditioner)</option>
+                            <option value="electrical">💡 ระบบไฟฟ้า / หลอดไฟ / ปลั๊ก (Electrical)</option>
+                            <option value="computer">🖥️ คอมพิวเตอร์ / จอภาพ / ระบบเครือข่าย (Computer)</option>
+                            <option value="furniture">🪑 ครุภัณฑ์ / โต๊ะ / เก้าอี้ / ประตู / หน้าต่าง (Furniture)</option>
+                            <option value="other">🔧 ปัญหาอื่นๆ (Other)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-exclamation-triangle-fill me-1 text-danger"></i> ระดับความเร่งด่วน <span class="text-danger">*</span>
+                        </label>
+                        <div class="d-flex gap-2">
+                            <div class="form-check form-check-inline border rounded p-2 flex-grow-1 text-center">
+                                <input class="form-check-input" type="radio" name="urgency" id="urgency_low" value="low">
+                                <label class="form-check-label small" for="urgency_low">ต่ำ (ไม่ด่วน)</label>
+                            </div>
+                            <div class="form-check form-check-inline border rounded p-2 flex-grow-1 text-center">
+                                <input class="form-check-input" type="radio" name="urgency" id="urgency_medium" value="medium" checked>
+                                <label class="form-check-label small fw-semibold" for="urgency_medium">ปานกลาง</label>
+                            </div>
+                            <div class="form-check form-check-inline border rounded p-2 flex-grow-1 text-center bg-danger-subtle border-danger">
+                                <input class="form-check-input" type="radio" name="urgency" id="urgency_high" value="high">
+                                <label class="form-check-label small text-danger fw-bold" for="urgency_high">สูง (ด่วนมาก)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Problem Description -->
+                <div class="mb-3">
+                    <label for="description" class="form-label fw-bold">
+                        <i class="bi bi-card-text me-1 text-primary"></i> รายละเอียดอาการหรือปัญหา <span class="text-danger">*</span>
+                    </label>
+                    <textarea class="form-control" id="description" name="description" rows="4" placeholder="โปรดระบุอาการของปัญหาให้ชัดเจน เช่น แอร์ไม่เย็น มีน้ำหยด เปิดไม่ติด มีเสียงดังผิดปกติ..." required></textarea>
+                </div>
+
+                <!-- Image Upload (โจทย์ที่ 5.3) -->
+                <div class="mb-4">
+                    <label for="before_images" class="form-label fw-bold">
+                        <i class="bi bi-camera me-1 text-primary"></i> แนบรูปภาพประกอบก่อนซ่อม (สามารถเลือกหลายรูปได้)
+                    </label>
+                    <input class="form-control" type="file" id="before_images" name="before_images" multiple accept="image/*" onchange="previewMultipleImages(this, 'imagePreviewRow')">
+                    <div class="form-text small text-muted">รองรับไฟล์ภาพ .jpg, .jpeg, .png, .webp (ขนาดรวมไม่เกิน 16MB)</div>
+
+                    <!-- Image Preview Row -->
+                    <div class="row g-2 mt-2" id="imagePreviewRow"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a href="{{ url_for('repairs_list') }}" class="btn btn-outline-secondary px-4">
+                        ยกเลิก
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border: none;">
+                        <i class="bi bi-send-fill me-1"></i> ส่งใบแจ้งซ่อม
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

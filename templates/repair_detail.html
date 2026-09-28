@@ -1,0 +1,420 @@
+{% extends "base.html" %}
+
+{% block title %}ใบแจ้งซ่อม {{ repair.request_no }}{% endblock %}
+
+{% block content %}
+<!-- Header Navigation & Action Buttons -->
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{{ url_for('repairs_list') }}">รายการแจ้งซ่อม</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ repair.request_no }}</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold mb-0">
+            ใบแจ้งซ่อม: <span class="text-primary">{{ repair.request_no }}</span>
+        </h2>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('repair_print', id=repair.id) }}" target="_blank" class="btn btn-outline-dark">
+            <i class="bi bi-printer me-1"></i> พิมพ์ / PDF
+        </a>
+        {% if current_user.is_admin %}
+        <button type="button" class="btn btn-outline-danger" onclick="confirmDeleteRepair()">
+            <i class="bi bi-trash"></i> ลบรายการ
+        </button>
+        <form id="deleteRepairForm" method="POST" action="{{ url_for('repair_delete', id=repair.id) }}" style="display: none;"></form>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Workflow Stepper (Section 1 Workflow) -->
+<div class="card card-custom mb-4 p-4 border-0">
+    <h6 class="text-muted fw-bold mb-3"><i class="bi bi-diagram-3-fill me-1"></i> ขั้นตอนการดำเนินงาน (Workflow Status)</h6>
+    <div class="workflow-stepper">
+        <!-- Step 1: รอรับเรื่อง -->
+        <div class="step-item {{ 'completed' if repair.status in ['accepted', 'in_progress', 'completed'] else 'active' }}">
+            <div class="step-circle">
+                {% if repair.status in ['accepted', 'in_progress', 'completed'] %}
+                    <i class="bi bi-check-lg"></i>
+                {% else %}
+                    1
+                {% endif %}
+            </div>
+            <div class="step-label">รอรับเรื่อง</div>
+            <small class="text-muted d-block" style="font-size: 11px;">(Pending)</small>
+        </div>
+
+        <!-- Step 2: รับเรื่องแล้ว -->
+        <div class="step-item {{ 'completed' if repair.status in ['in_progress', 'completed'] else ('active' if repair.status == 'accepted' else '') }}">
+            <div class="step-circle">
+                {% if repair.status in ['in_progress', 'completed'] %}
+                    <i class="bi bi-check-lg"></i>
+                {% else %}
+                    2
+                {% endif %}
+            </div>
+            <div class="step-label">รับเรื่องแล้ว</div>
+            <small class="text-muted d-block" style="font-size: 11px;">(Accepted)</small>
+        </div>
+
+        <!-- Step 3: กำลังดำเนินการ -->
+        <div class="step-item {{ 'completed' if repair.status == 'completed' else ('active' if repair.status == 'in_progress' else '') }}">
+            <div class="step-circle">
+                {% if repair.status == 'completed' %}
+                    <i class="bi bi-check-lg"></i>
+                {% else %}
+                    3
+                {% endif %}
+            </div>
+            <div class="step-label">กำลังดำเนินการ</div>
+            <small class="text-muted d-block" style="font-size: 11px;">(In Progress)</small>
+        </div>
+
+        <!-- Step 4: ซ่อมเสร็จ -->
+        <div class="step-item {{ 'completed' if repair.status == 'completed' else '' }}">
+            <div class="step-circle">
+                {% if repair.status == 'completed' %}
+                    <i class="bi bi-check-all"></i>
+                {% else %}
+                    4
+                {% endif %}
+            </div>
+            <div class="step-label">ซ่อมเสร็จ</div>
+            <small class="text-muted d-block" style="font-size: 11px;">(Completed)</small>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Details & Repair Images -->
+    <div class="col-lg-8">
+        <!-- Main Details Card -->
+        <div class="card card-custom mb-4 border-0">
+            <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-info-circle-fill text-primary me-2"></i> ข้อมูลรายละเอียดการแจ้งซ่อม
+                </h5>
+                <span class="{{ repair.status_badge_class }} fs-6 px-3 py-1">{{ repair.status_label }}</span>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-6">
+                        <div class="text-muted small">อาคาร / สถานที่</div>
+                        <div class="fw-bold fs-6">{{ repair.building }}</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-muted small">ห้อง / จุดเกิดเหตุ</div>
+                        <div class="fw-bold fs-6">{{ repair.room }}</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-muted small">ประเภทปัญหา</div>
+                        <div class="fw-bold"><i class="bi {{ repair.problem_type_icon }} me-1"></i> {{ repair.problem_type_label }}</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-muted small">ระดับความเร่งด่วน</div>
+                        <div><span class="{{ repair.urgency_badge_class }}">{{ repair.urgency_label }}</span></div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="mb-3">
+                    <div class="text-muted small fw-bold mb-1">รายละเอียดปัญหาที่แจ้ง:</div>
+                    <div class="p-3 bg-light rounded border text-dark" style="white-space: pre-wrap; font-size: 1.05rem;">{{ repair.description }}</div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <small class="text-muted">ผู้แจ้ง:</small>
+                        <div class="fw-semibold">{{ repair.reporter.fullname }} ({{ repair.reporter.email or 'ไม่มีอีเมล' }})</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <small class="text-muted">วันที่และเวลาแจ้ง:</small>
+                        <div class="fw-semibold">{{ repair.created_at|thai_date(include_time=True) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result & Cost Section (If in progress or completed) -->
+        {% if repair.status == 'completed' or repair.result %}
+        <div class="card card-custom mb-4 border-0 border-start border-4 border-success">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="fw-bold mb-0 text-success">
+                    <i class="bi bi-check2-circle me-2"></i> ผลการซ่อมและค่าใช้จ่าย
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="text-muted small">วันที่ดำเนินการเสร็จสิ้น:</div>
+                        <div class="fw-bold">{{ repair.completion_date|thai_date if repair.completion_date else '-' }}</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="text-muted small">ค่าใช้จ่ายทั้งหมด:</div>
+                        <div class="fw-bold fs-5 text-success">{{ "{:,.2f}".format(repair.cost or 0) }} บาท</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="text-muted small fw-bold mb-1">บันทึกผลการซ่อม / การแก้ไข:</div>
+                        <div class="p-3 bg-light rounded border text-dark">{{ repair.result }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Image Gallery (Before & After Photos) (โจทย์ที่ 5.3) -->
+        <div class="card card-custom mb-4 border-0">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-images text-primary me-2"></i> รูปภาพประกอบการซ่อม (Before & After)
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <!-- Before Images -->
+                <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-camera-fill me-1"></i> ภาพก่อนซ่อม (Before Repair)</h6>
+                <div class="row g-3 mb-4">
+                    {% for img in repair.before_images %}
+                    <div class="col-6 col-md-4">
+                        <div class="position-relative">
+                            <img src="{{ url_for('static', filename=img.image_path) }}" 
+                                 alt="Before repair" 
+                                 class="repair-thumbnail shadow-sm"
+                                 onclick="viewImageModal('{{ url_for('static', filename=img.image_path) }}', 'รูปภาพก่อนซ่อม - {{ repair.request_no }}')">
+                            <div class="text-center mt-1 small text-muted">
+                                {{ img.uploaded_at|thai_date(include_time=True) }}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-12">
+                        <p class="text-muted fst-italic">ไม่มีรูปภาพก่อนซ่อม</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- After Images -->
+                <h6 class="fw-bold text-success mb-3"><i class="bi bi-patch-check-fill me-1"></i> ภาพหลังซ่อมเสร็จ (After Repair)</h6>
+                <div class="row g-3">
+                    {% for img in repair.after_images %}
+                    <div class="col-6 col-md-4">
+                        <div class="position-relative">
+                            <img src="{{ url_for('static', filename=img.image_path) }}" 
+                                 alt="After repair" 
+                                 class="repair-thumbnail shadow-sm border-success"
+                                 onclick="viewImageModal('{{ url_for('static', filename=img.image_path) }}', 'รูปภาพหลังซ่อม - {{ repair.request_no }}')">
+                            <div class="text-center mt-1 small text-muted">
+                                {{ img.uploaded_at|thai_date(include_time=True) }}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-12">
+                        <p class="text-muted fst-italic">ไม่มีรูปภาพหลังซ่อม (จะบันทึกเมื่อซ่อมเสร็จ)</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Comments & Audit Discussion Section -->
+        <div class="card card-custom mb-4 border-0">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-chat-left-dots-fill text-primary me-2"></i> ความคิดเห็นและประวัติการบันทึก ({{ repair.comments|length }})
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="timeline">
+                    {% for c in repair.comments %}
+                    <div class="timeline-item">
+                        <div class="timeline-badge"></div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-primary">{{ c.author.fullname }}</span>
+                                <span class="badge {{ c.author.role_badge_class }}" style="font-size: 11px;">{{ c.author.role_label }}</span>
+                            </div>
+                            <p class="mb-1 text-dark">{{ c.comment }}</p>
+                            <small class="text-muted" style="font-size: 11px;"><i class="bi bi-clock me-1"></i> {{ c.created_at|thai_date(include_time=True) }}</small>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-muted fst-italic">ยังไม่มีความคิดเห็นหรือบันทึกเพิ่มเติม</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Add Comment Form -->
+                <form method="POST" action="{{ url_for('repair_add_comment', id=repair.id) }}" class="mt-4">
+                    <label for="comment" class="form-label fw-bold small text-muted">เพิ่มความคิดเห็น / บันทึกความคืบหน้า:</label>
+                    <div class="input-group">
+                        <textarea class="form-control" name="comment" id="comment" rows="2" placeholder="พิมพ์ข้อความที่นี่..." required></textarea>
+                        <button class="btn btn-primary fw-bold px-4" type="submit">
+                            <i class="bi bi-send-fill"></i> ส่ง
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Action Center & Responsible Staff -->
+    <div class="col-lg-4">
+        <!-- Responsible Staff Card -->
+        <div class="card card-custom mb-4 border-0">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="fw-bold mb-0 text-dark">
+                    <i class="bi bi-person-badge-fill text-primary me-2"></i> เจ้าหน้าที่ผู้รับผิดชอบ
+                </h6>
+            </div>
+            <div class="card-body p-3">
+                {% if repair.technician %}
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-warning-subtle text-warning-emphasis p-3 rounded-circle me-3">
+                        <i class="bi bi-wrench-adjustable fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">{{ repair.technician.fullname }}</div>
+                        <small class="text-muted">{{ repair.technician.email or 'ช่างประจำสถานศึกษา' }}</small>
+                    </div>
+                </div>
+                <div class="border-top pt-2">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>กำหนดเสร็จ:</span>
+                        <span class="fw-bold text-dark">{{ repair.due_date|thai_date if repair.due_date else 'ไม่ระบุ' }}</span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="bi bi-person-x fs-1 text-muted"></i>
+                    <p class="text-muted small mt-1 mb-0">ยังไม่มีการมอบหมายเจ้าหน้าที่</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Admin Action: Assign Technician -->
+        {% if current_user.is_admin and repair.status != 'completed' %}
+        <div class="card card-custom mb-4 border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-person-plus-fill me-1"></i> มอบหมายงานให้ช่าง (Admin)
+                </h6>
+            </div>
+            <div class="card-body p-3">
+                <form method="POST" action="{{ url_for('repair_assign', id=repair.id) }}">
+                    <div class="mb-3">
+                        <label for="technician_id" class="form-label small fw-bold">เลือกช่างซ่อม:</label>
+                        <select name="technician_id" id="technician_id" class="form-select" required>
+                            <option value="">-- เลือกช่างผู้รับผิดชอบ --</option>
+                            {% for tech in technicians %}
+                            <option value="{{ tech.id }}" {{ 'selected' if repair.assigned_to == tech.id }}>
+                                {{ tech.fullname }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="due_date" class="form-label small fw-bold">กำหนดเสร็จ (Due Date):</label>
+                        <input type="date" name="due_date" id="due_date" class="form-control" value="{{ repair.due_date.strftime('%Y-%m-%d') if repair.due_date else '' }}">
+                    </div>
+
+                    <button type="submit" class="btn btn-warning w-100 fw-bold text-dark">
+                        <i class="bi bi-check-circle-fill me-1"></i> บันทึกการมอบหมาย
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Technician / Admin Actions: Start Repair & Complete Repair -->
+        {% if (current_user.is_technician or current_user.is_admin) and repair.status != 'completed' %}
+        <div class="card card-custom mb-4 border-0">
+            <div class="card-header bg-warning text-dark py-3">
+                <h6 class="fw-bold mb-0">
+                    <i class="bi bi-tools me-1"></i> การจัดการงานซ่อม (Technician)
+                </h6>
+            </div>
+            <div class="card-body p-3">
+                <!-- Action 1: Start Repair -->
+                {% if repair.status in ['pending', 'accepted'] %}
+                <form method="POST" action="{{ url_for('repair_start', id=repair.id) }}" class="mb-3">
+                    <p class="small text-muted mb-2">เมื่อพร้อมเริ่มดำเนินการ ให้กดปุ่มนี้เพื่อเปลี่ยนสถานะเป็น "กำลังดำเนินการ"</p>
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">
+                        <i class="bi bi-play-circle-fill me-1"></i> เริ่มดำเนินการซ่อม
+                    </button>
+                </form>
+                {% endif %}
+
+                <!-- Action 2: Complete Repair -->
+                {% if repair.status in ['accepted', 'in_progress'] %}
+                <div class="border-top pt-3">
+                    <h6 class="fw-bold small text-success mb-2">
+                        <i class="bi bi-check2-square"></i> บันทึกผลการซ่อมเสร็จสิ้น:
+                    </h6>
+                    <button type="button" class="btn btn-success w-100 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#completeModal">
+                        <i class="bi bi-patch-check-fill me-1"></i> บันทึกผลและปิดงาน
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal: บันทึกผลการซ่อม (Complete Repair Modal) -->
+<div class="modal fade" id="completeModal" tabindex="-1" aria-labelledby="completeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('repair_complete', id=repair.id) }}" enctype="multipart/form-data">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold" id="completeModalLabel">
+                        <i class="bi bi-check-circle-fill me-2"></i> บันทึกผลการซ่อมเสร็จสิ้น ({{ repair.request_no }})
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="cost" class="form-label fw-bold">ค่าใช้จ่ายรวม (บาท):</label>
+                        <input type="number" step="0.01" class="form-control" id="cost" name="cost" placeholder="0.00" value="0.00" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="result" class="form-label fw-bold">รายละเอียดการแก้ไข / ผลการซ่อม: <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="result" name="result" rows="3" placeholder="ระบุสิ่งที่ได้ดำเนินการแก้ไขไป เช่น เปลี่ยนน็อต, ล้างแอร์, เปลี่ยนอะไหล่..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="after_images" class="form-label fw-bold">แนบรูปภาพหลังซ่อมเสร็จ (After Images):</label>
+                        <input class="form-control" type="file" id="after_images" name="after_images" multiple accept="image/*" onchange="previewMultipleImages(this, 'afterPreviewRow')">
+                        <div class="row g-2 mt-2" id="afterPreviewRow"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-success fw-bold px-4">
+                        <i class="bi bi-check-lg"></i> ยืนยันปิดงานซ่อม
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDeleteRepair() {
+    confirmAction(
+        'deleteRepairForm',
+        'ยืนยันการลบใบแจ้งซ่อม?',
+        'เมื่อลบแล้วจะไม่สามารถกู้คืนข้อมูลและรูปภาพได้',
+        'ใช่, ลบเลย'
+    );
+}
+</script>
+{% endblock %}

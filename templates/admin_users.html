@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}จัดการผู้ใช้งานในระบบ (Admin){% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-1">
+            <i class="bi bi-people-fill text-primary me-2"></i> จัดการผู้ใช้งานในระบบ
+        </h2>
+        <p class="text-muted mb-0">เพิ่ม แก้ไข และกำหนดสิทธิ์การใช้งาน (Admin, Teacher, Technician)</p>
+    </div>
+    <button type="button" class="btn btn-primary fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+        <i class="bi bi-person-plus-fill me-1"></i> เพิ่มผู้ใช้ใหม่
+    </button>
+</div>
+
+<!-- Users Table Card -->
+<div class="card card-custom border-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover table-custom align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>ลำดับ</th>
+                    <th>ชื่อผู้ใช้ (Username)</th>
+                    <th>ชื่อ-นามสกุล</th>
+                    <th>บทบาท (Role)</th>
+                    <th>อีเมล</th>
+                    <th>วันที่สร้าง</th>
+                    <th class="text-end">การจัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td class="fw-bold">@{{ u.username }}</td>
+                    <td>{{ u.fullname }}</td>
+                    <td>
+                        <span class="{{ u.role_badge_class }} px-2 py-1">{{ u.role_label }}</span>
+                    </td>
+                    <td>{{ u.email or '-' }}</td>
+                    <td class="small text-muted">{{ u.created_at|thai_date }}</td>
+                    <td class="text-end text-nowrap">
+                        <button type="button" class="btn btn-sm btn-outline-primary me-1" 
+                                onclick="openEditModal({{ u.id }}, '{{ u.username }}', '{{ u.fullname }}', '{{ u.role }}', '{{ u.email or '' }}')">
+                            <i class="bi bi-pencil-square"></i> แก้ไข
+                        </button>
+                        {% if u.id != current_user.id %}
+                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                onclick="confirmDeleteUser({{ u.id }}, '{{ u.username }}')">
+                            <i class="bi bi-trash"></i> ลบ
+                        </button>
+                        <form id="deleteUserForm_{{ u.id }}" method="POST" action="{{ url_for('admin_delete_user', user_id=u.id) }}" style="display: none;"></form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal: เพิ่มผู้ใช้ใหม่ -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin_add_user') }}">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="addUserModalLabel">
+                        <i class="bi bi-person-plus-fill me-2"></i> เพิ่มผู้ใช้งานใหม่
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-bold">ชื่อผู้ใช้ (Username): <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="username" id="username" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label fw-bold">รหัสผ่าน: <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" name="password" id="password" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="fullname" class="form-label fw-bold">ชื่อ-นามสกุล และสังกัด: <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="fullname" id="fullname" placeholder="เช่น อาจารย์สมหมาย พัฒนาดี" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="role" class="form-label fw-bold">บทบาทผู้ใช้งาน (Role): <span class="text-danger">*</span></label>
+                        <select name="role" id="role" class="form-select" required>
+                            <option value="teacher">ครู / บุคลากร (Teacher)</option>
+                            <option value="technician">เจ้าหน้าที่ซ่อม (Technician)</option>
+                            <option value="admin">ผู้ดูแลระบบ (Admin)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-bold">อีเมล:</label>
+                        <input type="email" class="form-control" name="email" id="email" placeholder="example@school.ac.th">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary fw-bold">บันทึกข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: แก้ไขผู้ใช้ -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" id="editUserForm" action="">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold" id="editUserModalLabel">
+                        <i class="bi bi-pencil-square me-2"></i> แก้ไขข้อมูลผู้ใช้
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">ชื่อผู้ใช้ (Username):</label>
+                        <input type="text" class="form-control bg-light" id="edit_username" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_fullname" class="form-label fw-bold">ชื่อ-นามสกุล และสังกัด:</label>
+                        <input type="text" class="form-control" name="fullname" id="edit_fullname" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_role" class="form-label fw-bold">บทบาทผู้ใช้งาน (Role):</label>
+                        <select name="role" id="edit_role" class="form-select" required>
+                            <option value="teacher">ครู / บุคลากร (Teacher)</option>
+                            <option value="technician">เจ้าหน้าที่ซ่อม (Technician)</option>
+                            <option value="admin">ผู้ดูแลระบบ (Admin)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_email" class="form-label fw-bold">อีเมล:</label>
+                        <input type="email" class="form-control" name="email" id="edit_email">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_password" class="form-label fw-bold">เปลี่ยนรหัสผ่านใหม่ (เว้นว่างหากไม่เปลี่ยน):</label>
+                        <input type="password" class="form-control" name="password" id="edit_password" placeholder="ตั้งรหัสผ่านใหม่...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary fw-bold">บันทึกการแก้ไข</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openEditModal(userId, username, fullname, role, email) {
+    document.getElementById('editUserForm').action = "/admin/users/" + userId + "/edit";
+    document.getElementById('edit_username').value = username;
+    document.getElementById('edit_fullname').value = fullname;
+    document.getElementById('edit_role').value = role;
+    document.getElementById('edit_email').value = email;
+    document.getElementById('edit_password').value = '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+    modal.show();
+}
+
+function confirmDeleteUser(userId, username) {
+    confirmAction(
+        'deleteUserForm_' + userId,
+        'ยืนยันการลบผู้ใช้ @' + username + '?',
+        'ผู้ใช้งานนี้จะไม่สามารถเข้าสู่ระบบได้อีกต่อไป',
+        'ใช่, ลบเลย'
+    );
+}
+</script>
+{% endblock %}
