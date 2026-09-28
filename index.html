@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบงานปฏิบัติการ: ระบบแจ้งซ่อมภายในโรงเรียน (Python Edition)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Sarabun', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #2c3e50;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header h2 {
+            color: #7f8c8d;
+            font-size: 18px;
+            font-weight: normal;
+        }
+        
+        .header .tech-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #3776ab 0%, #ffd43b 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .student-info {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .student-info p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+        }
+        
+        .section-title {
+            background: linear-gradient(135deg, #3776ab 0%, #ffd43b 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        .subsection {
+            background: #f8f9fa;
+            padding: 20px;
+            border-left: 4px solid #3776ab;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .subsection h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .question {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .question-number {
+            background: #3776ab;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .answer-space {
+            min-height: 80px;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #fafafa;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            margin: 15px 0;
+            line-height: 1.5;
+            border-left: 4px solid #ffd43b;
+        }
+        
+        .code-block .keyword { color: #569cd6; }
+        .code-block .string { color: #ce9178; }
+        .code-block .comment { color: #6a9955; font-style: italic; }
+        .code-block .class-name { color: #4ec9b0; }
+        .code-block .function { color: #dcdcaa; }
+        .code-block .decorator { color: #d7ba7d; }
+        .code-block .number { color: #b5cea8; }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            background: white;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 4px solid #27ae60;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .feature-list li::before {
+            content: "✓ ";
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .highlight-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .highlight-box strong {
+            color: #856404;
+        }
+        
+        .database-schema {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background: #3776ab;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .workflow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .workflow-step {
+            background: #3776ab;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            text-align: center;
+            flex: 1;
+            margin: 5px;
+            min-width: 120px;
+        }
+        
+        .workflow-arrow {
+            color: #3776ab;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .faq-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .faq-q {
+            background: #f1f8ff;
+            padding: 15px 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 15px;
+        }
+        .faq-a {
+            padding: 15px 20px;
+            color: #555;
+            line-height: 1.8;
+            background: #fcfcfc;
+        }
+        .faq-a ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .faq-a li {
+            margin-bottom: 8px;
+        }
+        .faq-a code {
+            background: #fff3cd;
+            color: #856404;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: 'Consolas', monospace;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 ใบงานปฏิบัติการ: ระบบแจ้งซ่อมภายในโรงเรียน</h1>
+            <h2>การวิเคราะห์ออกแบบระบบ (OOAD) และการพัฒนาด้วย Python</h2>
+            <span class="tech-badge">🐍 Python 3.10+ | SQLite | Flask | SweetAlert2</span>
+        </div>
+        
+        <div class="student-info">
+            <p><strong>รายวิชา:</strong> การพัฒนาเว็บแอปพลิเคชัน (Web Application Development)</p>
+            <p><strong>ชื่อ-นามสกุล:</strong> นายกิติกร เทศธรรม <strong>รหัสนักศึกษา:</strong> 674259003 <strong>กลุ่ม:</strong> .....</p>
+            <p><strong>วันที่ส่ง:</strong> ........................... <strong>คะแนน:</strong> .........../100</p>
+        </div>
+
+        <!-- ส่วนที่ 1 -->
+        <div class="section">
+            <div class="section-title">📋 ส่วนที่ 1: ความต้องการของระบบ (System Requirements)</div>
+            
+            <div class="subsection">
+                <h3>🎯 ปัญหาและแนวทางแก้ไข</h3>
+                <p>ในโรงเรียนมีปัญหาเกี่ยวกับการแจ้งซ่อมอุปกรณ์ต่างๆ เช่น:</p>
+                <ul style="margin: 15px 0; padding-left: 20px;">
+                    <li>💡 ไฟในห้องเรียนไม่ติด แต่ไม่รู้ว่าใครรับผิดชอบ</li>
+                    <li>❄️ แอร์ไม่เย็น แจ้งไปแล้วแต่ไม่รู้ว่าซ่อมถึงขั้นตอนไหน</li>
+                    <li>🖥️ คอมพิวเตอร์ใช้งานไม่ได้ ไม่มีประวัติการซ่อมย้อนหลัง</li>
+                </ul>
+                <p><strong>ระบบนี้จะช่วย:</strong> รวบรวมงานซ่อมไว้ในที่เดียว ตั้งแต่แจ้งปัญหา มอบหมายเจ้าหน้าที่ ติดตามความคืบหน้า ไปจนถึงบันทึกผลการซ่อม พร้อมประวัติให้ตรวจสอบย้อนหลัง</p>
+            </div>
+
+            <div class="subsection">
+                <h3>✨ ฟังก์ชันหลักของระบบ</h3>
+                <ul class="feature-list">
+                    <li><strong>🔐 ระบบสิทธิ์:</strong> แยกสิทธิ์ผู้ดูแล (Admin), ครู/บุคลากร (Teacher), และเจ้าหน้าที่ซ่อม (Technician)</li>
+                    <li><strong>📝 แจ้งซ่อม:</strong> ระบุอาคาร ห้อง ประเภทปัญหา และความเร่งด่วน</li>
+                    <li><strong>📸 แนบรูปภาพ:</strong> ภาพก่อน-หลังซ่อม เพื่อเห็นรายละเอียดชัดเจน</li>
+                    <li><strong>👨‍🔧 มอบหมายงาน:</strong> กำหนดผู้รับผิดชอบ พร้อมวันเสร็จที่กำหนด</li>
+                    <li><strong>💬 แสดงความคิดเห็น:</strong> เพิ่มข้อความสอบถามและข้อมูลประกอบในใบแจ้งซ่อม</li>
+                    <li><strong>💰 บันทึกค่าใช้จ่าย:</strong> บันทึกผลการแก้ไขและค่าใช้จ่ายในการซ่อม</li>
+                    <li><strong>📊 Dashboard:</strong> สรุปงาน พร้อมค้นหา กรองข้อมูล และส่งออก CSV</li>
+                    <li><strong>🖨️ พิมพ์/PDF:</strong> พิมพ์ใบแจ้งซ่อม A4 หรือบันทึกเป็น PDF</li>
+                </ul>
+            </div>
+
+            <div class="subsection">
+                <h3>📌 ขั้นตอนการทำงาน (Workflow)</h3>
+                <div class="workflow">
+                    <div class="workflow-step">📥 รอรับเรื่อง</div>
+                    <div class="workflow-arrow">→</div>
+                    <div class="workflow-step">✓ รับเรื่องแล้ว</div>
+                    <div class="workflow-arrow">→</div>
+                    <div class="workflow-step">🔧 กำลังดำเนินการ</div>
+                    <div class="workflow-arrow">→</div>
+                    <div class="workflow-step">✅ ซ่อมเสร็จ</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <span class="question-number">คำถามที่ 1.1</span>
+                <p><strong>จงระบุ User Roles ทั้ง 3 ประเภท</strong> และอธิบายสิทธิ์การเข้าถึงข้อมูลของแต่ละบทบาท</p>
+                <div class="answer-space">
+                    <ol>
+                        <li><strong>ผู้ดูแลระบบ (Admin):</strong> สิทธิ์เต็มในการจัดการระบบ สามารถจัดการข้อมูลผู้ใช้งาน (เพิ่ม/แก้ไข/ลบ/กำหนดบทบาท), มอบหมายงานแจ้งซ่อมให้ช่าง, ดู Dashboard สรุปภาพรวม และ export ข้อมูลรายงานทั้งหมด</li>
+                        <li><strong>ครู / บุคลากร (Teacher):</strong> สิทธิ์ในการสร้างใบแจ้งซ่อมใหม่, ติดตามสถานะงานซ่อมของตนเอง, เพิ่มรูปภาพประกอบปัญหา, พิมพ์ใบแจ้งซ่อม และเขียนความคิดเห็นเพิ่มเติมในใบแจ้งซ่อมของตนเอง</li>
+                        <li><strong>เจ้าหน้าที่ซ่อม / ช่าง (Technician):</strong> สิทธิ์ในการดูรายการงานซ่อมที่ได้รับมอบหมาย, อัปเดตสถานะงานซ่อม (รับเรื่อง -> กำลังดำเนินการ -> ซ่อมเสร็จ), แนบรูปภาพหลังการซ่อม และบันทึกผลการแก้ไขพร้อมค่าใช้จ่าย</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="question">
+                <span class="question-number">คำถามที่ 1.2</span>
+                <p><strong>จงสกัดคำนาม (Noun Extraction)</strong> จากโจทย์ความต้องการด้านบน เพื่อระบุคลาสที่ควรสร้างในระบบ (เช่น <code>RepairRequest</code>, <code>User</code>, <code>Comment</code>) และคำนามที่ไม่ควรสร้างเป็นคลาส พร้อมอธิบายเหตุผล</p>
+                <div class="answer-space" style="min-height: 120px;">
+                    <p><strong>1. คำนามที่ควรสร้างเป็น คลาส (Domain Classes):</strong></p>
+                    <ul>
+                        <li><code>User</code>: แทนผู้ใช้งานในระบบ (มีสิทธิ์ Admin, Teacher, Technician)</li>
+                        <li><code>RepairRequest</code>: แทนใบแจ้งซ่อม (เก็บบันทึกรายละเอียดปัญหา สถานะ และความเร่งด่วน)</li>
+                        <li><code>RepairImage</code>: แทนรูปภาพประกอบการซ่อม (รูปก่อน-หลังซ่อม)</li>
+                        <li><code>Comment</code>: แทนความคิดเห็นหรือการสอบถามเพิ่มเติมในใบแจ้งซ่อม</li>
+                    </ul>
+                    <p><strong>2. คำนามที่ไม่ควรสร้างเป็นคลาส พร้อมเหตุผล:</strong></p>
+                    <ul>
+                        <li><code>Building / Room</code>: ไม่ควรสร้างเป็นคลาสแยกในระยะแรก แต่ควรเป็นเพียง Attributes (String) ใน `RepairRequest` เพื่อลดความซับซ้อน ยกเว้นกรณีต้องการบริหารจัดการพื้นที่ในระบบแยกต่างหาก</li>
+                        <li><code>Urgency / ProblemType / Status</code>: ควรเป็นเพียง Enum หรือ Attributes ของ `RepairRequest` ไม่ใช่คลาสอิสระ เพราะไม่มี พฤติกรรม (Behavior) ของตัวเอง</li>
+                        <li><code>Dashboard / Report</code>: ไม่ใช่ Domain Entity แต่เป็น View/Controller หรือบริการสำหรับแสดงผลสรุปข้อมูล</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 2 -->
+        <div class="section">
+            <div class="section-title">🏗️ ส่วนที่ 2: การออกแบบฐานข้อมูล (Database Design)</div>
+            
+            <div class="subsection">
+                <h3>📊 โครงสร้างฐานข้อมูล SQLite</h3>
+                <div class="database-schema">
+                    <strong>1. users</strong> (ผู้ใช้งานระบบ)<br>
+                    ├─ id (INTEGER, PK, AUTOINCREMENT)<br>
+                    ├─ username (TEXT, UNIQUE)<br>
+                    ├─ password_hash (TEXT)<br>
+                    ├─ fullname (TEXT)<br>
+                    ├─ role (TEXT CHECK: 'admin', 'teacher', 'technician')<br>
+                    ├─ email (TEXT)<br>
+                    └─ created_at (TIMESTAMP DEFAULT CURRENT_TIMESTAMP)<br><br>
+
+                    <strong>2. repair_requests</strong> (ใบแจ้งซ่อม)<br>
+                    ├─ id (INTEGER, PK)<br>
+                    ├─ request_no (TEXT, UNIQUE) - รหัสใบแจ้งซ่อม<br>
+                    ├─ user_id (INTEGER, FK → users)<br>
+                    ├─ building (TEXT) - อาคาร<br>
+                    ├─ room (TEXT) - ห้อง<br>
+                    ├─ problem_type (TEXT CHECK: 'electrical', 'furniture', 'computer', 'aircon', 'other')<br>
+                    ├─ description (TEXT) - รายละเอียดปัญหา<br>
+                    ├─ urgency (TEXT CHECK: 'low', 'medium', 'high')<br>
+                    ├─ status (TEXT CHECK: 'pending', 'accepted', 'in_progress', 'completed')<br>
+                    ├─ assigned_to (INTEGER, FK → users, NULL)<br>
+                    ├─ due_date (DATE, NULL)<br>
+                    ├─ completion_date (DATE, NULL)<br>
+                    ├─ cost (REAL, NULL)<br>
+                    ├─ result (TEXT, NULL) - ผลการซ่อม<br>
+                    └─ created_at (TIMESTAMP)<br><br>
+
+                    <strong>3. repair_images</strong> (รูปภาพประกอบ)<br>
+                    ├─ id (INTEGER, PK)<br>
+                    ├─ repair_id (INTEGER, FK → repair_requests)<br>
+                    ├─ image_type (TEXT CHECK: 'before', 'after')<br>
+                    ├─ image_path (TEXT)<br>
+                    └─ uploaded_at (TIMESTAMP)<br><br>
+
+                    <strong>4. comments</strong> (ความคิดเห็น)<br>
+                    ├─ id (INTEGER, PK)<br>
+                    ├─ repair_id (INTEGER, FK → repair_requests)<br>
+                    ├─ user_id (INTEGER, FK → users)<br>
+                    ├─ comment (TEXT)<br>
+                    └─ created_at (TIMESTAMP)
+                </div>
+            </div>
+
+            <div class="question">
+                <span class="question-number">คำถามที่ 2.1</span>
+                <p><strong>จงเขียน SQL CREATE TABLE</strong> สำหรับตาราง <code>repair_requests</code> พร้อมกำหนด Foreign Key Constraints และ CHECK Constraints ใน SQLite</p>
+                <div class="answer-space" style="min-height: 200px;">
+                    <div class="code-block" style="margin: 0;">
+<span class="keyword">CREATE TABLE</span> repair_requests (
+    id <span class="keyword">INTEGER PRIMARY KEY AUTOINCREMENT</span>,
+    request_no <span class="keyword">TEXT UNIQUE NOT NULL</span>,
+    user_id <span class="keyword">INTEGER NOT NULL</span>,
+    building <span class="keyword">TEXT NOT NULL</span>,
+    room <span class="keyword">TEXT NOT NULL</span>,
+    problem_type <span class="keyword">TEXT NOT NULL CHECK</span>(problem_type <span class="keyword">IN</span> (<span class="string">'electrical'</span>, <span class="string">'furniture'</span>, <span class="string">'computer'</span>, <span class="string">'aircon'</span>, <span class="string">'other'</span>)),
+    description <span class="keyword">TEXT NOT NULL</span>,
+    urgency <span class="keyword">TEXT NOT NULL DEFAULT</span> <span class="string">'medium'</span> <span class="keyword">CHECK</span>(urgency <span class="keyword">IN</span> (<span class="string">'low'</span>, <span class="string">'medium'</span>, <span class="string">'high'</span>)),
+    status <span class="keyword">TEXT NOT NULL DEFAULT</span> <span class="string">'pending'</span> <span class="keyword">CHECK</span>(status <span class="keyword">IN</span> (<span class="string">'pending'</span>, <span class="string">'accepted'</span>, <span class="string">'in_progress'</span>, <span class="string">'completed'</span>)),
+    assigned_to <span class="keyword">INTEGER NULL</span>,
+    due_date <span class="keyword">DATE NULL</span>,
+    completion_date <span class="keyword">DATE NULL</span>,
+    cost <span class="keyword">REAL NULL</span>,
+    result <span class="keyword">TEXT NULL</span>,
+    created_at <span class="keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>,
+    <span class="keyword">FOREIGN KEY</span> (user_id) <span class="keyword">REFERENCES</span> users(id) <span class="keyword">ON DELETE CASCADE</span>,
+    <span class="keyword">FOREIGN KEY</span> (assigned_to) <span class="keyword">REFERENCES</span> users(id) <span class="keyword">ON DELETE SET NULL</span>
+);</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <span class="question-number">คำถามที่ 2.2</span>
+                <p><strong>จงอธิบายความสัมพันธ์ (Relationships)</strong> ระหว่างตารางต่างๆ พร้อมระบุ Cardinality (1:1, 1:N, M:N) และอธิบายว่าเหตุใดจึงแยกตาราง <code>repair_images</code> ออกจาก <code>repair_requests</code></p>
+                <div class="answer-space" style="min-height: 150px;">
+                    <p><strong>ความสัมพันธ์ระหว่างตาราง (Cardinality):</strong></p>
+                    <ul>
+                        <li><code>users</code> → <code>repair_requests</code> (1:N): ผู้ใช้ 1 คนสามารถแจ้งซ่อมได้หลายรายการ แต่ใบแจ้งซ่อม 1 ใบสร้างโดยผู้ใช้คนเดียว</li>
+                        <li><code>users</code> (ช่าง) → <code>repair_requests</code> (1:N): ช่าง 1 คนรับผิดชอบซ่อมได้หลายงาน แต่ใบแจ้งซ่อม 1 ใบถูกมอบหมายให้ช่างคนเดียว (`assigned_to`)</li>
+                        <li><code>repair_requests</code> → <code>repair_images</code> (1:N): ใบแจ้งซ่อม 1 ใบมีภาพแนบได้หลายภาพ (ทั้งก่อนซ่อมและหลังซ่อม)</li>
+                        <li><code>repair_requests</code> → <code>comments</code> (1:N): ใบแจ้งซ่อม 1 ใบมีหลายความคิดเห็น</li>
+                        <li><code>users</code> → <code>comments</code> (1:N): ผู้ใช้ 1 คนโพสต์ได้หลายความคิดเห็น</li>
+                    </ul>
+                    <p><strong>เหตุผลที่แยกตาราง `repair_images` ออกจาก `repair_requests`:</strong></p>
+                    <p>เป็นการปฏิบัติตามหลัก <strong>Database Normalization (1NF)</strong> เพื่อป้องกัน Repeating Groups เนื่องจากใบแจ้งซ่อม 1 ใบสามารถแนบรูปถ่ายได้มากกว่า 1 รูป (เช่น ก่อนซ่อม 2 รูป, หลังซ่อม 1 รูป) หากเก็บในตาราง `repair_requests` จะทำให้เกิดปัญหาต้องจอง column ไว้หลายช่อง (`img1`, `img2`) ซึ่งไม่ยืดหยุ่น การแยกตารางทำให้สามารถแนบกี่รูปก็ได้ และจัดการ metadata ของแต่ละรูปได้สะดวก</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 3 -->
+        <div class="section">
+            <div class="section-title">💻 ส่วนที่ 3: การพัฒนาด้วย Python 3.10+ (Python Implementation)</div>
+            
+            <div class="subsection">
+                <h3>🔧 ตัวอย่างโค้ด: คลาส RepairRequest พร้อม Type Hints</h3>
+                <div class="code-block">
+<span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass, field
+<span class="keyword">from</span> datetime <span class="keyword">import</span> date, datetime
+<span class="keyword">from</span> typing <span class="keyword">import</span> Optional
+<span class="keyword">from</span> enum <span class="keyword">import</span> Enum
+
+
+<span class="keyword">class</span> <span class="class-name">RequestStatus</span>(Enum):
+    PENDING = <span class="string">"pending"</span>
+    ACCEPTED = <span class="string">"accepted"</span>
+    IN_PROGRESS = <span class="string">"in_progress"</span>
+    COMPLETED = <span class="string">"completed"</span>
+
+
+<span class="keyword">class</span> <span class="class-name">ProblemType</span>(Enum):
+    ELECTRICAL = <span class="string">"electrical"</span>
+    FURNITURE = <span class="string">"furniture"</span>
+    COMPUTER = <span class="string">"computer"</span>
+    AIRCON = <span class="string">"aircon"</span>
+    OTHER = <span class="string">"other"</span>
+
+
+<span class="decorator">@dataclass</span>
+<span class="keyword">class</span> <span class="class-name">RepairRequest</span>:
+    <span class="string">"""คลาสแทนใบแจ้งซ่อม (Repair Request)"""</span>
+    id: <span class="class-name">int</span>
+    request_no: <span class="class-name">str</span>
+    user_id: <span class="class-name">int</span>
+    building: <span class="class-name">str</span>
+    room: <span class="class-name">str</span>
+    problem_type: <span class="class-name">ProblemType</span>
+    description: <span class="class-name">str</span>
+    urgency: <span class="class-name">str</span> = <span class="string">"medium"</span>
+    status: <span class="class-name">RequestStatus</span> = <span class="class-name">RequestStatus</span>.PENDING
+    assigned_to: <span class="class-name">Optional</span>[<span class="class-name">int</span>] = <span class="keyword">None</span>
+    due_date: <span class="class-name">Optional</span>[<span class="class-name">date</span>] = <span class="keyword">None</span>
+    cost: <span class="class-name">Optional</span>[<span class="class-name">float</span>] = <span class="keyword">None</span>
+    created_at: <span class="class-name">datetime</span> = field(default_factory=datetime.now)
+
+    <span class="keyword">def</span> <span class="function">assign_to</span>(self, technician_id: <span class="class-name">int</span>, due_date: <span class="class-name">date</span>) -> <span class="keyword">None</span>:
+        <span class="string">"""มอบหมายงานให้เจ้าหน้าที่"""</span>
+        self.assigned_to = technician_id
+        self.due_date = due_date
+        self.status = <span class="class-name">RequestStatus</span>.ACCEPTED
+
+    <span class="keyword">def</span> <span class="function">start_repair</span>(self) -> <span class="keyword">None</span>:
+        <span class="string">"""เริ่มดำเนินการซ่อม (ต้องรับเรื่องก่อน)"""</span>
+        <span class="keyword">if</span> self.status != <span class="class-name">RequestStatus</span>.ACCEPTED:
+            <span class="keyword">raise</span> <span class="class-name">ValueError</span>(<span class="string">"Cannot start repair: Request not accepted yet"</span>)
+        self.status = <span class="class-name">RequestStatus</span>.IN_PROGRESS
+
+    <span class="keyword">def</span> <span class="function">complete_repair</span>(self, cost: <span class="class-name">float</span>, result: <span class="class-name">str</span>) -> <span class="keyword">None</span>:
+        <span class="string">"""บันทึกผลการซ่อม"""</span>
+        self.cost = cost
+        self.status = <span class="class-name">RequestStatus</span>.COMPLETED
+        <span class="comment"># Save result to database via repository</span>
+
+
+<span class="comment"># --- ตัวอย่างการใช้งาน ---</span>
+request = <span class="class-name">RepairRequest</span>(
+    id=<span class="number">1</span>,
+    request_no=<span class="string">"RP-202609-001"</span>,
+    user_id=<span class="number">10</span>,
+    building=<span class="string">"อาคาร 3"</span>,
+    room=<span class="string">"301"</span>,
+    problem_type=<span class="class-name">ProblemType</span>.AIRCON,
+    description=<span class="string">"แอร์ไม่เย็น มีเสียงดัง"</span>,
+    urgency=<span class="string">"high"</span>
+)
+request.assign_to(technician_id=<span class="number">5</span>, due_date=date(<span class="number">2026</span>, <span class="number">9</span>, <span class="number">25</span>))
+request.start_repair()
+request.complete_repair(cost=<span class="number">1500.0</span>, result=<span class="string">"ล้างแอร์และเติมสารทำความเย็น"</span>)
+<span class="keyword">print</span>(f<span class="string">"สถานะ: {request.status.value}, ค่าใช้จ่าย: {request.cost} บาท"</span>)
+                </div>
+            </div>
+
+            <div class="question">
+                <span class="question-number">คำถามที่ 3.1</span>
+                <p><strong>จากโค้ดข้างต้น</strong> จงอธิบายว่า:</p>
+                <ul style="margin: 10px 0 10px 20px;">
+                    <li>หลักการ <strong>Encapsulation</strong> ถูกนำมาใช้อย่างไรใน Python (เปรียบเทียบกับ PHP)</li>
+                    <li>เหตุใดจึงใช้ <code>Optional[int]</code> และ <code>Optional[date]</code> (Nullable Types)</li>
+                    <li><code>@dataclass</code> decorator ช่วยลดโค้ดซ้ำซ้อนอย่างไร</li>
+                </ul>
+                <div class="answer-space" style="min-height: 150px;">
+                    <ul>
+                        <li><strong>Encapsulation:</strong> ใช้การซ่อนสถานะภายในและการเปลี่ยนสถานะของวัตถุผ่าน Methods (เช่น `assign_to`, `start_repair`) เพื่อควบคุมความถูกต้องของข้อมูล แทนที่จะอนุญาตให้แก้ไข Attribute โดยตรง ใน Python จะใช้หลัก Convention เช่น การใช้ `_` สำหรับ Private Access ขณะที่ PHP ใช้ Keywords เช่น `private`/`protected` ในระดับ Language Level</li>
+                        <li><strong>การใช้ Optional[T]:</strong> เพื่อแสดงอย่างชัดเจนว่า Attribute นั้นมีสิทธิ์เป็น `None` (Null) ได้ เช่น `assigned_to` หรือ `due_date` จะยังไม่มีค่าจนกว่า Admin จะมอบหมายงาน ช่วยให้ Static Analysis Tools (เช่น mypy) ตรวจจับ Bug ประเภท `AttributeError` ได้ก่อนรันจริง</li>
+                        <li><strong>@dataclass Decorator:</strong> ช่วยสร้าง Method พื้นฐานให้อัตโนมัติ เช่น `__init__()`, `__repr__()`, `__eq__()` ทำให้ไม่ต้องเขียน Boilerplate Code ในการตั้งค่า `self.x = x` ซ้ำๆ เหมือนการเขียน Class ปกติ</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="question">
+                <span class="question-number">คำถามที่ 3.2</span>
+                <p><strong>จงเขียน Python Function</strong> สำหรับสร้างรหัสใบแจ้งซ่อมอัตโนมัติ (Format: RP-YYYYMM-XXX เช่น RP-202609-001) โดยใช้ <code>datetime</code> และ <code>str.zfill()</code></p>
+                <div class="answer-space" style="min-height: 150px;">
+                    <div class="code-block" style="margin: 0;">
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+
+<span class="keyword">def</span> <span class="function">generate_request_no</span>(sequence_number: <span class="class-name">int</span>) -> <span class="class-name">str</span>:
+    <span class="string">"""
+    สร้างรหัสใบแจ้งซ่อม รูปแบบ RP-YYYYMM-XXX
+    :param sequence_number: ลำดับที่ของใบแจ้งซ่อมในเดือนนั้นๆ
+    """</span>
+    now = datetime.now()
+    year_month = now.strftime(<span class="string">"%Y%m"</span>)
+    padded_seq = <span class="class-name">str</span>(sequence_number).zfill(<span class="number">3</span>)
+    <span class="keyword">return</span> <span class="string">f"RP-{year_month}-{padded_seq}"</span>
+
+<span class="comment"># ตัวอย่างทดสอบการใช้งาน</span>
+<span class="keyword">print</span>(generate_request_no(<span class="number">1</span>))   <span class="comment"># ผลลัพธ์: RP-202609-001</span>
+<span class="keyword">print</span>(generate_request_no(<span class="number">45</span>))  <span class="comment"># ผลลัพธ์: RP-202609-045</span>
+</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <span class="question-number">คำถามที่ 3.3</span>
+                <p><strong>จงอธิบาย State Transition</strong> ของ <code>status</code> ในคลาส <code>RepairRequest</code> ว่าเปลี่ยนจาก <code>pending → accepted → in_progress → completed</code> ได้อย่างไร และเหตุใดจึงต้องมีเงื่อนไขตรวจสอบใน method <code>start_repair()</code> (เปรียบเทียบกับหลักการ State Pattern)</p>
+                <div class="answer-space" style="min-height: 120px;">
+                    <p><strong>State Transition & Validation:</strong></p>
+                    <p>การเปลี่ยนสถานะจาก <code>pending → accepted → in_progress → completed</code> ตามลำดับ ต้องผ่าน Business Rules ที่ถูกต้อง ใน method <code>start_repair()</code> มีการเช็คเงื่อนไข <code>if self.status != RequestStatus.ACCEPTED: raise ValueError(...)</code> เพื่อป้องกันการข้ามขั้นตอน เช่น งานที่ยังไม่มีการมอบหมายช่าง (`pending`) ไม่ควรถูกปรับเป็นกำลังดำเนินการ (`in_progress`) ได้ทันที</p>
+                    <p><strong>เปรียบเทียบกับ State Pattern:</strong></p>
+                    <p>แนวคิดนี้ประยุกต์มาจาก <strong>State Design Pattern</strong> เพื่อรับประกัน Data Integrity และความถูกต้องของกระบวนการทำงาน (Workflow) ซึ่งช่วยให้ระบบสามารถตรวจสอบสถานะปัจจุบันก่อนอนุญาตให้เกิด Action ถัดไป ป้องกันข้อผิดพลาดของข้อมูลในฐานข้อมูล</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 4 -->
+        <div class="section">
+            <div class="section-title">🎨 ส่วนที่ 4: การออกแบบอินเทอร์เฟซ (UI/UX Design)</div>
+            
+            <div class="subsection">
+                <h3>📱 หน้าจอหลักของระบบ (Flask + Jinja2 + Bootstrap)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>หน้าจอ</th>
+                            <th>Route (Flask)</th>
+                            <th>ผู้ใช้ที่เข้าถึงได้</th>
+                            <th>ฟังก์ชันหลัก</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dashboard</td>
+                            <td><code>/dashboard</code></td>
+                            <td>ทุกบทบาท</td>
+                            <td>สรุปสถิติ, งานที่รับผิดชอบ</td>
+                        </tr>
+                        <tr>
+                            <td>แจ้งซ่อมใหม่</td>
+                            <td><code>/repair/create</code></td>
+                            <td>ครู/บุคลากร</td>
+                            <td>กรอกข้อมูล, แนบรูปภาพ</td>
+                        </tr>
+                        <tr>
+                            <td>รายการแจ้งซ่อม</td>
+                            <td><code>/repairs</code></td>
+                            <td>ทุกบทบาท</td>
+                            <td>ดูรายการ, ค้นหา, กรอง</td>
+                        </tr>
+                        <tr>
+                            <td>รายละเอียดใบแจ้งซ่อม</td>
+                            <td><code>/repair/&lt;id&gt;</code></td>
+                            <td>ทุกบทบาท</td>
+                            <td>ดูข้อมูล, เพิ่มความคิดเห็น, อัปเดตสถานะ</td>
+                        </tr>
+                        <tr>
+                            <td>จัดการผู้ใช้</td>
+                            <td><code>/admin/users</code></td>
+                            <td>ผู้ดูแลเท่านั้น</td>
+                            <td>เพิ่ม/แก้ไข/ลบผู้ใช้</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="question">
+                <span class="question-number">คำถามที่ 4.1</span>
+                <p><strong>จงออกแบบ Wireframe</strong> ของหน้า "แจ้งซ่อมใหม่" โดยระบุองค์ประกอบหลัก (Form Fields, Buttons, Validation) และเขียน Flask route function สำหรับ <code>/repair/create</code> (GET/POST)</p>
+                <div class="answer-space" style="min-height: 280px;">
+                    <p><strong>1. Wireframe Layout (ฟอร์มแจ้งซ่อมใหม่):</strong></p>
+                    <ul>
+                        <li><strong>Header:</strong> หัวข้อ "แบบฟอร์มแจ้งซ่อมอุปกรณ์/สถานที่"</li>
+                        <li><strong>Form Fields:</strong>
+                            <ul>
+                                <li><code>building</code> (Select/Input): เลือกอาคาร (Validation: Required)</li>
+                                <li><code>room</code> (Text Input): ระบุห้อง (Validation: Required)</li>
+                                <li><code>problem_type</code> (Dropdown): เลือกประเภทปัญหา ('electrical', 'furniture', 'computer', 'aircon', 'other')</li>
+                                <li><code>urgency</code> (Radio Button): ความเร่งด่วน ('low', 'medium', 'high')</li>
+                                <li><code>description</code> (Textarea): อธิบายรายละเอียดอาการเสีย (Validation: Required, Min 10 chars)</li>
+                                <li><code>images</code> (File Input): อัปโหลดรูปภาพปัญหา (Accept: image/*)</li>
+                            </ul>
+                        </li>
+                        <li><strong>Buttons:</strong> ปุ่ม "ส่งข้อมูลแจ้งซ่อม" (Submit - primary) และ ปุ่ม "ยกเลิก" (Cancel - secondary)</li>
+                    </ul>
+                    <p><strong>2. Flask Route Function (<code>/repair/create</code>):</strong></p>
+                    <div class="code-block">
+<span class="decorator">@app.route</span>(<span class="string">'/repair/create'</span>, methods=[<span class="string">'GET'</span>, <span class="string">'POST'</span>])
+<span class="decorator">@login_required</span>
+<span class="keyword">def</span> <span class="function">create_repair</span>():
+    <span class="keyword">if</span> request.method == <span class="string">'POST'</span>:
+        building = request.form.get(<span class="string">'building'</span>)
+        room = request.form.get(<span class="string">'room'</span>)
+        problem_type = request.form.get(<span class="string">'problem_type'</span>)
+        urgency = request.form.get(<span class="string">'urgency'</span>)
+        description = request.form.get(<span class="string">'description'</span>)
+        
+        <span class="keyword">if</span> <span class="keyword">not</span> all([building, room, problem_type, description]):
+            flash(<span class="string">'กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน'</span>, <span class="string">'warning'</span>)
+            <span class="keyword">return</span> redirect(url_for(<span class="string">'create_repair'</span>))
+
+        <span class="comment"># บันทึกลงฐานข้อมูล</span>
+        new_repair = RepairRequest(
+            request_no=generate_request_no(get_next_seq()),
+            user_id=current_user.id,
+            building=building,
+            room=room,
+            problem_type=problem_type,
+            urgency=urgency,
+            description=description
+        )
+        db.session.add(new_repair)
+        db.session.commit()
+        
+        flash(<span class="string">'แจ้งซ่อมเรียบร้อยแล้ว'</span>, <span class="string">'success'</span>)
+        <span class="keyword">return</span> redirect(url_for(<span class="string">'list_repairs'</span>))
+
+    <span class="keyword">return</span> render_template(<span class="string">'repair_create.html'</span>)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 5 -->
+        <div class="section">
+            <div class="section-title">🚀 ส่วนที่ 5: โจทย์ฝึกปฏิบัติ (Coding Exercise)</div>
+            
+            <div class="highlight-box">
+                <strong>📦 สิ่งที่ต้องส่ง:</strong>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li>✅ ซอร์สโค้ด Python (ไฟล์ <code>.py</code> ทั้งหมด + <code>requirements.txt</code>)</li>
+                    <li>✅ ฐานข้อมูล SQLite (ไฟล์ <code>.db</code> หรือ <code>schema.sql</code>)</li>
+                    <li>✅ เทมเพลต HTML/Jinja2 (โฟลเดอร์ <code>templates/</code>)</li>
+                    <li>✅ คู่มือติดตั้ง (README.md)</li>
+                    <li>✅ Screenshots ของหน้าจอหลัก</li>
+                </ul>
+            </div>
+
+            <div class="question">
+                <span class="question-number">โจทย์ที่ 5.1</span>
+                <p><strong>สร้างระบบ Login</strong> ด้วย Flask-Login พร้อม Session Management และ <code>@login_required</code> decorator ตรวจสอบสิทธิ์การเข้าถึงหน้าต่างๆ</p>
+                <div class="answer-space" style="min-height: 200px;">
+                    <div class="code-block" style="margin: 0;">
+<span class="keyword">from</span> flask <span class="keyword">import</span> Flask, render_template, redirect, url_for, request, flash
+<span class="keyword">from</span> flask_login <span class="keyword">import</span> LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+<span class="keyword">from</span> werkzeug.security <span class="keyword">import</span> check_password_hash
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = <span class="string">'login'</span>
+
+<span class="decorator">@login_manager.user_loader</span>
+<span class="keyword">def</span> <span class="function">load_user</span>(user_id):
+    <span class="keyword">return</span> User.query.get(<span class="class-name">int</span>(user_id))
+
+<span class="decorator">@app.route</span>(<span class="string">'/login'</span>, methods=[<span class="string">'GET'</span>, <span class="string">'POST'</span>])
+<span class="keyword">def</span> <span class="function">login</span>():
+    <span class="keyword">if</span> request.method == <span class="string">'POST'</span>:
+        username = request.form.get(<span class="string">'username'</span>)
+        password = request.form.get(<span class="string">'password'</span>)
+        user = User.query.filter_by(username=username).first()
+        
+        <span class="keyword">if</span> user <span class="keyword">and</span> check_password_hash(user.password_hash, password):
+            login_user(user)
+            <span class="keyword">return</span> redirect(url_for(<span class="string">'dashboard'</span>))
+        flash(<span class="string">'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'</span>, <span class="string">'danger'</span>)
+    <span class="keyword">return</span> render_template(<span class="string">'login.html'</span>)
+
+<span class="decorator">@app.route</span>(<span class="string">'/logout'</span>)
+<span class="decorator">@login_required</span>
+<span class="keyword">def</span> <span class="function">logout</span>():
+    logout_user()
+    <span class="keyword">return</span> redirect(url_for(<span class="string">'login'</span>))</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <span class="question-number">โจทย์ที่ 5.2</span>
+                <p><strong>สร้างหน้า Dashboard</strong> แสดงสถิติ: จำนวนงานทั้งหมด, งานที่รอดำเนินการ, งานที่กำลังดำเนินการ, งานที่เสร็จแล้ว โดยใช้ SQLAlchemy Query</p>
+                <div class="answer-space" style="min-height: 200px;">
+                    <div class="code-block" style="margin: 0;">
+<span class="decorator">@app.route</span>(<span class="string">'/dashboard'</span>)
+<span class="decorator">@login_required</span>
+<span class="keyword">def</span> <span class="function">dashboard</span>():
+    total_jobs = RepairRequest.query.count()
+    pending_jobs = RepairRequest.query.filter_by(status=<span class="string">'pending'</span>).count()
+    in_progress_jobs = RepairRequest.query.filter_by(status=<span class="string">'in_progress'</span>).count()
+    completed_jobs = RepairRequest.query.filter_by(status=<span class="string">'completed'</span>).count()
+    
+    stats = {
+        <span class="string">'total'</span>: total_jobs,
+        <span class="string">'pending'</span>: pending_jobs,
+        <span class="string">'in_progress'</span>: in_progress_jobs,
+        <span class="string">'completed'</span>: completed_jobs
+    }
+    <span class="keyword">return</span> render_template(<span class="string">'dashboard.html'</span>, stats=stats)</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <span class="question-number">โจทย์ที่ 5.3</span>
+                <p><strong>สร้างระบบอัปโหลดรูปภาพ</strong> ก่อน-หลังซ่อม ด้วย <code>werkzeug.utils.secure_filename</code> พร้อมแสดงรูปภาพในหน้ารายละเอียด</p>
+                <div class="answer-space" style="min-height: 200px;">
+                    <div class="code-block" style="margin: 0;">
+<span class="keyword">import</span> os
+<span class="keyword">from</span> werkzeug.utils <span class="keyword">import</span> secure_filename
+
+UPLOAD_FOLDER = <span class="string">'static/uploads'</span>
+ALLOWED_EXTENSIONS = {<span class="string">'png'</span>, <span class="string">'jpg'</span>, <span class="string">'jpeg'</span>, <span class="string">'gif'</span>}
+
+<span class="keyword">def</span> <span class="function">allowed_file</span>(filename):
+    <span class="keyword">return</span> <span class="string">'.'</span> <span class="keyword">in</span> filename <span class="keyword">and</span> filename.rsplit(<span class="string">'.'</span>, <span class="number">1</span>)[<span class="number">1</span>].lower() <span class="keyword">in</span> ALLOWED_EXTENSIONS
+
+<span class="decorator">@app.route</span>(<span class="string">'/repair/<int:repair_id>/upload'</span>, methods=[<span class="string">'POST'</span>])
+<span class="decorator">@login_required</span>
+<span class="keyword">def</span> <span class="function">upload_image</span>(repair_id):
+    file = request.files.get(<span class="string">'image'</span>)
+    image_type = request.form.get(<span class="string">'image_type'</span>) <span class="comment"># 'before' หรือ 'after'</span>
+    
+    <span class="keyword">if</span> file <span class="keyword">and</span> allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        save_name = f<span class="string">"{repair_id}_{image_type}_{filename}"</span>
+        file.save(os.path.join(UPLOAD_FOLDER, save_name))
+        
+        new_img = RepairImage(
+            repair_id=repair_id,
+            image_type=image_type,
+            image_path=f<span class="string">"uploads/{save_name}"</span>
+        )
+        db.session.add(new_img)
+        db.session.commit()
+        flash(<span class="string">'อัปโหลดรูปภาพเรียบร้อยแล้ว'</span>, <span class="string">'success'</span>)
+    <span class="keyword">return</span> redirect(url_for(<span class="string">'repair_detail'</span>, id=repair_id))</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <span class="question-number">โจทย์ที่ 5.4</span>
+                <p><strong>สร้างระบบแจ้งเตือน</strong> ด้วย SweetAlert2 เมื่อ:
+                    <br>• แจ้งซ่อมสำเร็จ
+                    <br>• มอบหมายงานสำเร็จ
+                    <br>• อัปเดตสถานะสำเร็จ
+                </p>
+                <div class="answer-space" style="min-height: 150px;">
+                    <div class="code-block" style="margin: 0;">
+<span class="comment">&lt;!-- ตัวอย่างการแสดงผล SweetAlert2 ด้วย Jinja2 ใน base.html --&gt;</span>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    &lt;<span class="keyword">script</span> src=<span class="string">"https://cdn.jsdelivr.net/npm/sweetalert2@11"</span>&gt;&lt;/<span class="keyword">script</span>&gt;
+    &lt;<span class="keyword">script</span>&gt;
+      {% for category, message in messages %}
+        Swal.fire({
+          icon: <span class="string">'{{ category }}'</span>, <span class="comment">// 'success', 'error', 'warning'</span>
+          title: <span class="string">'แจ้งเตือน'</span>,
+          text: <span class="string">'{{ message }}'</span>,
+          timer: <span class="number">2000</span>,
+          showConfirmButton: <span class="keyword">false</span>
+        });
+      {% endfor %}
+    &lt;/<span class="keyword">script</span>&gt;
+  {% endif %}
+{% endwith %}</div>
+                </div>
+            </div>
+
+            <div class="question">
+                <span class="question-number">โจทย์ที่ 5.5 (Bonus)</span>
+                <p><strong>สร้างระบบส่งออกข้อมูล</strong> เป็นไฟล์ CSV ด้วย <code>csv</code> module และสร้างฟังก์ชันพิมพ์ใบแจ้งซ่อมเป็น PDF ด้วย <code>WeasyPrint</code> หรือ <code>pdfkit</code></p>
+                <div class="answer-space" style="min-height: 200px;">
+                    <div class="code-block" style="margin: 0;">
+<span class="keyword">import</span> csv
+<span class="keyword">from</span> io <span class="keyword">import</span> StringIO
+<span class="keyword">from</span> flask <span class="keyword">import</span> Response
+
+<span class="decorator">@app.route</span>(<span class="string">'/export/csv'</span>)
+<span class="decorator">@login_required</span>
+<span class="keyword">def</span> <span class="function">export_csv</span>():
+    repairs = RepairRequest.query.all()
+    si = StringIO()
+    cw = csv.writer(si)
+    
+    <span class="comment"># เขียน Header</span>
+    cw.writerow([<span class="string">'Request No'</span>, <span class="string">'Building'</span>, <span class="string">'Room'</span>, <span class="string">'Problem Type'</span>, <span class="string">'Status'</span>, <span class="string">'Cost'</span>])
+    
+    <span class="comment"># เขียนข้อมูล</span>
+    <span class="keyword">for</span> r <span class="keyword">in</span> repairs:
+        cw.writerow([r.request_no, r.building, r.room, r.problem_type, r.status, r.cost])
+        
+    output = si.getvalue()
+    <span class="keyword">return</span> Response(
+        output,
+        mimetype=<span class="string">"text/csv"</span>,
+        headers={<span class="string">"Content-Disposition"</span>: <span class="string">"attachment;filename=repair_report.csv"</span>}
+    )</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 6: FAQ & Student Inquiries -->
+        <div class="section">
+            <div class="section-title">💡 ส่วนที่ 6: คำถามที่นักศึกษาต้องการทราบ / ข้อสงสัยที่พบบ่อย (FAQ & Clarifications)</div>
+            
+            <div class="subsection">
+                <h3>🔍 ข้อสงสัยที่พบบ่อย (Frequently Asked Questions)</h3>
+                <p style="color:#7f8c8d; font-size:14px; margin-bottom:15px;">รวมคำถามที่นักศึกษามักสงสัยในการวิเคราะห์และออกแบบระบบแจ้งซ่อมโรงเรียน (Python Edition) พร้อมแนวคำตอบเพื่อทบทวนความเข้าใจ</p>
+                
+                <div class="faq-item">
+                    <div class="faq-q">❓ Q1: ทำไมต้องใช้ Enum class สำหรับ <code>RequestStatus</code> และ <code>ProblemType</code> แทนการใช้ string ธรรมดา?</div>
+                    <div class="faq-a">
+                        <strong>แนวคำตอบ:</strong> การใช้ <code>Enum</code> จาก module <code>enum</code> มีข้อดีหลายประการ:
+                        <ul>
+                            <li><strong>Type Safety:</strong> ป้องกันการป้อนค่าผิด เช่น พิมพ์ <code>"pendding"</code> แทน <code>"pending"</code> → IDE จะเตือนทันที</li>
+                            <li><strong>Autocomplete:</strong> VS Code / PyCharm จะแนะนำค่าที่เป็นไปได้ทั้งหมด</li>
+                            <li><strong>Refactoring ง่าย:</strong> เปลี่ยนชื่อค่าจากที่เดียว ทุกจุดที่ใช้จะถูกอัปเดตอัตโนมัติ</li>
+                            <li><strong>Self-documenting:</strong> โค้ดอ่านเข้าใจได้เองว่าระบบมีสถานะอะไรบ้าง</li>
+                            <li><strong>SQLite CHECK:</strong> ใช้คู่กับ <code>CHECK IN (...)</code> ในฐานข้อมูลได้</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-q">❓ Q2: ทำไมต้องแยกตาราง <code>repair_images</code> ออกจาก <code>repair_requests</code>? เก็บเป็น path ในตารางหลักเลยไม่ได้หรือ?</div>
+                    <div class="faq-a">
+                        <strong>แนวคำตอบ:</strong> การแยกตารางเป็นหลักการ <strong>Normalization (1NF)</strong> เพราะ:
+                        <ul>
+                            <li><strong>1 ใบแจ้งซ่อม มีหลายรูป:</strong> ความสัมพันธ์เป็น 1:N (อาจมีรูปก่อนซ่อม 2 รูป, หลังซ่อม 3 รูป)</li>
+                            <li><strong>ยืดหยุ่น:</strong> เพิ่มรูปได้ไม่จำกัด ไม่ต้องแก้โครงสร้างตาราง</li>
+                            <li><strong>Query ง่าย:</strong> <code>SELECT * FROM repair_images WHERE repair_id = ?</code></li>
+                            <li><strong>ถ้าเก็บในตารางหลัก:</strong> ต้องสร้างคอลัมน์ <code>image1, image2, image3...</code> ซึ่งไม่ยืดหยุ่นและเสียพื้นที่</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-q">❓ Q3: ในโค้ด Python มี <code>Optional[int]</code> และ <code>Optional[date]</code> มันคืออะไร? ต่างจาก PHP <code>?int</code> อย่างไร?</div>
+                    <div class="faq-a">
+                        <strong>แนวคำตอบ:</strong> <code>Optional[X]</code> จาก module <code>typing</code> หมายความว่า ตัวแปรนั้นสามารถรับค่าเป็น type <code>X</code> <strong>หรือ</strong> ค่า <code>None</code> ก็ได้ (เทียบเท่า <code>X | None</code> ใน Python 3.10+)
+                        <ul>
+                            <li><strong>PHP:</strong> <code>?int</code> (Nullable Types) - ตรวจสอบตอน Runtime เท่านั้น</li>
+                            <li><strong>Python:</strong> <code>Optional[int]</code> - เป็น Type Hint สำหรับ Static Type Checker (mypy) และ IDE</li>
+                            <li>มักใช้กับ Attribute ที่ "อาจจะยังไม่มีค่า" ในช่วงแรก เช่น <code>assigned_to</code>, <code>due_date</code>, <code>cost</code></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-q">❓ Q4: <code>@dataclass</code> decorator คืออะไร? ทำไมต้องใช้?</div>
+                    <div class="faq-a">
+                        <strong>แนวคำตอบ:</strong> <code>@dataclass</code> (Python 3.7+) เป็น decorator ที่สร้าง <code>__init__</code>, <code>__repr__</code>, <code>__eq__</code> ให้อัตโนมัติจาก class attributes
+                        <ul>
+                            <li><strong>ลด Boilerplate:</strong> ไม่ต้องเขียน <code>__init__</code> เอง (เทียบเท่า Constructor Promotion ใน PHP 8)</li>
+                            <li><strong>อ่านง่าย:</strong> เห็นโครงสร้างข้อมูลได้ชัดเจนในบรรทัดเดียว</li>
+                            <li><strong>Immutable ได้:</strong> ใช้ <code>@dataclass(frozen=True)</code> สำหรับ immutable objects</li>
+                            <li><strong>เหมาะกับ Model:</strong> ใช้แทน ORM Model ในกรณีที่ไม่ต้องการความซับซ้อน</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>
